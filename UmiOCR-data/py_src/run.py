@@ -47,12 +47,16 @@ import site
 # 启动主qml。工作路径必须为 UmiOCR-data
 def runQml(engineAddImportPath):
     # ==================== 0. 导入包 ====================
-    from PySide2.QtCore import Qt
+    from PySide2.QtCore import Qt, qInstallMessageHandler
     from PySide2.QtGui import QGuiApplication
     from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
 
     from umi_about import UmiAbout  # 项目信息
+    from umi_log import get_qt_message_handler, logger  # 日志
     from .utils import app_opengl  # 渲染器
+
+    # ==================== 0. QT 日志重定向到 Umi 日志模块 ====================
+    qInstallMessageHandler(get_qt_message_handler())
 
     # ==================== 1. 全局参数设置 ====================
     # 启用 OpenGL 上下文之间的资源共享
@@ -119,7 +123,7 @@ def runQml(engineAddImportPath):
     if res != 0:
         msg = f"Umi-OCR 异常退出。代码：{str(res)}\nUmi-OCR exited abnormally. Code: {str(res)}"
         os.MessageBox(msg)
-    print("###  QML引擎关闭！")
+    logger.info("QML引擎关闭")
 
 
 def main(app_path, engineAddImportPath=""):
@@ -130,6 +134,7 @@ def main(app_path, engineAddImportPath=""):
     # 初始化运行信息
     site.addsitedir("./py_src/imports")  # 自定义库添加到搜索路径
     import umi_about
+
     if not umi_about.init(app_path):  # 初始化版本信息，失败则结束运行
         sys.exit(0)
 
